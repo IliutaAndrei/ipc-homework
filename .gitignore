@@ -426,3 +426,13 @@ FodyWeavers.xsd
 
 # Official VS Code C# Dev Kit Extension exclusion
 #*.lscache
+
+
+# vcpkg generated dependencies
+vcpkg_installed/
+
+# Received files
+received_files/
+
+# Test files
+test.txt

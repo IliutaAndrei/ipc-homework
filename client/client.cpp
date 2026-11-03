@@ -1,20 +1,78 @@
-// client.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
+#include <boost/asio.hpp>
+#include <fstream>
+#include <vector>
+#include <iterator>
+#include <filesystem>
 
-int main()
+constexpr const char* LOCALHOST = "127.0.0.1";
+constexpr unsigned short SERVER_PORT = 5000;
+constexpr unsigned short FILENAME_MAX_SIZE = 255;
+
+using boost::asio::ip::tcp;
+
+
+int main(int argc, char* argv[])
 {
-    std::cout << "Hello World!\n";
+	try
+	{
+		if (argc != 2)
+		{
+			std::cerr << "Usage: client <filename>" << std::endl;
+			return 1;
+		}
+
+		std::filesystem::path file_path(argv[1]);
+		std::string filename = file_path.filename().string();
+
+		if (filename.empty() ||
+			filename.size() > FILENAME_MAX_SIZE ||
+			filename.find('\n') != std::string::npos)
+		{
+			std::cerr << "Invalid filename\n";
+			return 1;
+		}
+
+		std::ifstream filein(argv[1], std::ios::binary);
+
+		if (!filein.is_open())
+		{
+			std::cerr << "Could not open: " << argv[1] << "\n";
+			return 1;
+		}
+
+		std::vector<char> file_data(
+			(std::istreambuf_iterator<char>(filein)),
+			std::istreambuf_iterator<char>()
+		);
+
+		if (filein.bad())
+		{
+			std::cerr << "Error reading file\n";
+			return 1;
+		}
+
+		boost::asio::io_context io_context;
+		tcp::endpoint endpoint(
+			boost::asio::ip::make_address(LOCALHOST),
+			SERVER_PORT
+		);
+
+		tcp::socket socket(io_context);
+		socket.connect(endpoint);
+		std::cout << "Connected to server\n";
+
+		std::string header = filename + "\n";
+		boost::asio::write(socket, boost::asio::buffer(header));
+		boost::asio::write(socket, boost::asio::buffer(file_data));
+
+		socket.shutdown(tcp::socket::shutdown_send);
+		std::cout << "File sent successfully\n";
+		
+
+	} catch (const std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+		return 1;
+	}
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file

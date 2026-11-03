@@ -3,5 +3,9 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path="vcpkg.json" />
+  </Folder>
   <Project Path="client/client.vcxproj" />
+  <Project Path="server/server.vcxproj" />
 </Solution>

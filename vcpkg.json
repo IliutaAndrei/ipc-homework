@@ -1,0 +1,8 @@
+{
+  "name": "ipc-homework",
+  "version": "1.0.0",
+  "dependencies": [
+    "boost-asio"
+  ],
+  "builtin-baseline": "afa249f12f52ed8a3b919f195495ba8b330288d1"
+}
